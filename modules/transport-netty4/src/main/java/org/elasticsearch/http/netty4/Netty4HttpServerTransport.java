@@ -214,7 +214,7 @@ public class Netty4HttpServerTransport extends AbstractLifecycleComponent implem
         this.bigArrays = bigArrays;
         this.threadPool = threadPool;
         this.xContentRegistry = xContentRegistry;
-        this.dispatcher = dispatcher;
+        this.dispatcher = dispatcher; // = RestController
 
         ByteSizeValue maxContentLength = SETTING_HTTP_MAX_CONTENT_LENGTH.get(settings);
         this.maxChunkSize = SETTING_HTTP_MAX_CHUNK_SIZE.get(settings);
@@ -286,6 +286,7 @@ public class Netty4HttpServerTransport extends AbstractLifecycleComponent implem
                 HTTP_SERVER_WORKER_THREAD_NAME_PREFIX)));
             serverBootstrap.channel(NioServerSocketChannel.class);
 
+            //
             serverBootstrap.childHandler(configureServerChannelHandler());
 
             serverBootstrap.childOption(ChannelOption.TCP_NODELAY, SETTING_HTTP_TCP_NO_DELAY.get(settings));
@@ -308,6 +309,7 @@ public class Netty4HttpServerTransport extends AbstractLifecycleComponent implem
             serverBootstrap.option(ChannelOption.SO_REUSEADDR, reuseAddress);
             serverBootstrap.childOption(ChannelOption.SO_REUSEADDR, reuseAddress);
 
+            // 绑定地址
             this.boundAddress = createBoundHttpAddress();
             if (logger.isInfoEnabled()) {
                 logger.info("{}", boundAddress);
@@ -331,6 +333,7 @@ public class Netty4HttpServerTransport extends AbstractLifecycleComponent implem
 
         List<TransportAddress> boundAddresses = new ArrayList<>(hostAddresses.length);
         for (InetAddress address : hostAddresses) {
+            // 绑定地址
             boundAddresses.add(bindAddress(address));
         }
 
@@ -419,6 +422,7 @@ public class Netty4HttpServerTransport extends AbstractLifecycleComponent implem
         boolean success = port.iterate(portNumber -> {
             try {
                 synchronized (serverChannels) {
+                    // 绑定地址
                     ChannelFuture future = serverBootstrap.bind(new InetSocketAddress(hostAddress, portNumber)).sync();
                     serverChannels.add(future.channel());
                     boundSocket.set((InetSocketAddress) future.channel().localAddress());
@@ -494,6 +498,7 @@ public class Netty4HttpServerTransport extends AbstractLifecycleComponent implem
     void dispatchRequest(final RestRequest request, final RestChannel channel) {
         final ThreadContext threadContext = threadPool.getThreadContext();
         try (ThreadContext.StoredContext ignore = threadContext.stashContext()) {
+            // dispatcher = RestController
             dispatcher.dispatchRequest(request, channel, threadContext);
         }
     }
@@ -546,6 +551,7 @@ public class Netty4HttpServerTransport extends AbstractLifecycleComponent implem
                 final boolean detailedErrorsEnabled,
                 final ThreadContext threadContext) {
             this.transport = transport;
+            //
             this.requestHandler = new Netty4HttpRequestHandler(transport, detailedErrorsEnabled, threadContext);
         }
 
@@ -574,6 +580,7 @@ public class Netty4HttpServerTransport extends AbstractLifecycleComponent implem
             if (transport.pipelining) {
                 ch.pipeline().addLast("pipelining", new HttpPipeliningHandler(transport.logger, transport.pipeliningMaxEvents));
             }
+            // 处理器
             ch.pipeline().addLast("handler", requestHandler);
         }
 

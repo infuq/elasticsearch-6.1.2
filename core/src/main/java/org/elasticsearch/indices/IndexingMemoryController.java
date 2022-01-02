@@ -125,6 +125,7 @@ public class IndexingMemoryController extends AbstractComponent implements Index
                      this.indexingBuffer,
                      SHARD_INACTIVE_TIME_SETTING.getKey(), this.inactiveTime,
                      SHARD_MEMORY_INTERVAL_TIME_SETTING.getKey(), this.interval);
+        //
         this.scheduler = scheduleTask(threadPool);
 
         // Need to save this so we can later launch async "write indexing buffer to disk" on shards:

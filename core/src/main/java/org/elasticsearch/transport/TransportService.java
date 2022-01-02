@@ -205,6 +205,7 @@ public class TransportService extends AbstractLifecycleComponent {
 
     @Override
     protected void doStart() {
+        // transport = Netty4Transport
         transport.setTransportService(this);
         transport.start();
 
@@ -632,6 +633,9 @@ public class TransportService extends AbstractLifecycleComponent {
     }
 
     private void sendLocalRequest(long requestId, final String action, final TransportRequest request, TransportRequestOptions options) {
+
+        System.out.println("线程["+Thread.currentThread().getName()+"],类名["+this.getClass().getName()+"],执行sendLocalRequest方法");
+
         final DirectResponseChannel channel = new DirectResponseChannel(logger, localNode, action, requestId, this, threadPool);
         try {
             onRequestSent(localNode, requestId, action, request, options);

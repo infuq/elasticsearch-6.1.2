@@ -57,6 +57,7 @@ public abstract class AbstractLifecycleComponent extends AbstractComponent imple
     @SuppressWarnings({"unchecked"})
     @Override
     public void start() {
+        System.out.println("线程["+Thread.currentThread().getName()+"]启动[" + this.getClass().getName() + "]...");
         if (!lifecycle.canMoveToStarted()) {
             return;
         }

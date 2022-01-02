@@ -81,6 +81,7 @@ public class Netty4Plugin extends Plugin implements NetworkPlugin {
                                                           CircuitBreakerService circuitBreakerService,
                                                           NamedWriteableRegistry namedWriteableRegistry,
                                                           NetworkService networkService) {
+        // 创建 Netty4Transport
         return Collections.singletonMap(NETTY_TRANSPORT_NAME, () -> new Netty4Transport(settings, threadPool, networkService, bigArrays,
             namedWriteableRegistry, circuitBreakerService));
     }
@@ -92,7 +93,10 @@ public class Netty4Plugin extends Plugin implements NetworkPlugin {
                                                                         NamedXContentRegistry xContentRegistry,
                                                                         NetworkService networkService,
                                                                         HttpServerTransport.Dispatcher dispatcher) {
+
         return Collections.singletonMap(NETTY_HTTP_TRANSPORT_NAME,
+            // 创建 Netty4HttpServerTransport
+            // dispatcher = RestController
             () -> new Netty4HttpServerTransport(settings, networkService, bigArrays, threadPool, xContentRegistry, dispatcher));
     }
 }

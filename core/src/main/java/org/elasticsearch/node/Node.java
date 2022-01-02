@@ -310,6 +310,7 @@ public class Node implements Closeable {
 
             final List<ExecutorBuilder<?>> executorBuilders = pluginsService.getExecutorBuilders(settings);
 
+            //
             final ThreadPool threadPool = new ThreadPool(settings, executorBuilders.toArray(new ExecutorBuilder[0]));
             resourcesToClose.add(() -> ThreadPool.terminate(threadPool, 10, TimeUnit.SECONDS));
             // adds the context to the DeprecationLogger so that it does not need to be injected everywhere
@@ -385,6 +386,8 @@ public class Node implements Closeable {
                 .flatMap(Function.identity()).collect(toList()));
             modules.add(new RepositoriesModule(this.environment, pluginsService.filterPlugins(RepositoryPlugin.class), xContentRegistry));
             final MetaStateService metaStateService = new MetaStateService(settings, nodeEnvironment, xContentRegistry);
+
+            //
             final IndicesService indicesService = new IndicesService(settings, pluginsService, nodeEnvironment, xContentRegistry,
                     analysisModule.getAnalysisRegistry(),
                 clusterModule.getIndexNameExpressionResolver(), indicesModule.getMapperRegistry(), namedWriteableRegistry,
@@ -402,9 +405,12 @@ public class Node implements Closeable {
                 threadPool, pluginsService.filterPlugins(ActionPlugin.class), client, circuitBreakerService, usageService);
             modules.add(actionModule);
 
+            // RestController
             final RestController restController = actionModule.getRestController();
             final NetworkModule networkModule = new NetworkModule(settings, false, pluginsService.filterPlugins(NetworkPlugin.class),
-                    threadPool, bigArrays, circuitBreakerService, namedWriteableRegistry, xContentRegistry, networkService, restController);
+                    threadPool, bigArrays, circuitBreakerService, namedWriteableRegistry,
+                    xContentRegistry, networkService, restController);
+
             Collection<UnaryOperator<Map<String, MetaData.Custom>>> customMetaDataUpgraders =
                 pluginsService.filterPlugins(Plugin.class).stream()
                     .map(Plugin::getCustomMetaDataUpgrader)
@@ -421,6 +427,7 @@ public class Node implements Closeable {
             final GatewayMetaState gatewayMetaState = new GatewayMetaState(settings, nodeEnvironment, metaStateService,
                 metaDataIndexUpgradeService, metaDataUpgrader);
             new TemplateUpgradeService(settings, client, clusterService, threadPool, indexTemplateMetaDataUpgraders);
+            // 创建 Netty4Transport
             final Transport transport = networkModule.getTransportSupplier().get();
             final TransportService transportService = newTransportService(settings, transport, threadPool,
                 networkModule.getTransportInterceptor(), localNodeFactory, settingsModule.getClusterSettings());
@@ -430,6 +437,7 @@ public class Node implements Closeable {
             final Consumer<Binder> httpBind;
             final HttpServerTransport httpServerTransport;
             if (networkModule.isHttpEnabled()) {
+                // 创建 Netty4HttpServerTransport
                 httpServerTransport = networkModule.getHttpServerTransportSupplier().get();
                 httpBind = b -> {
                     b.bind(HttpServerTransport.class).toInstance(httpServerTransport);
@@ -610,7 +618,7 @@ public class Node implements Closeable {
         // Start the transport service now so the publish address will be added to the local disco node in ClusterService
         TransportService transportService = injector.getInstance(TransportService.class);
         transportService.getTaskManager().setTaskResultsService(injector.getInstance(TaskResultsService.class));
-        transportService.start();
+        transportService.start(); // 启动Netty4Transport
         assert localNodeFactory.getNode() != null;
         assert transportService.getLocalNode().equals(localNodeFactory.getNode())
             : "transportService has a different local node than the factory provided";
@@ -677,6 +685,7 @@ public class Node implements Closeable {
 
 
         if (NetworkModule.HTTP_ENABLED.get(settings)) {
+            // 启动 Netty4HttpServerTransport
             injector.getInstance(HttpServerTransport.class).start();
         }
 

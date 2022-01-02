@@ -209,8 +209,11 @@ public class ThreadPool extends AbstractComponent implements Scheduler, Closeabl
         this.executors = unmodifiableMap(executors);
         this.scheduler = Scheduler.initScheduler(settings);
         TimeValue estimatedTimeInterval = ESTIMATED_TIME_INTERVAL_SETTING.get(settings);
+
+        //
         this.cachedTimeThread = new CachedTimeThread(EsExecutors.threadName(settings, "[timer]"), estimatedTimeInterval.millis());
         this.cachedTimeThread.start();
+        System.out.println("启动timer线程");
     }
 
     /**

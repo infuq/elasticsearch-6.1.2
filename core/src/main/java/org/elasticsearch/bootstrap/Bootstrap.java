@@ -85,6 +85,9 @@ final class Bootstrap {
                 }
             }
         }, "elasticsearch[keepAlive/" + Version.CURRENT + "]");
+
+        System.out.println("在实例化Bootstrap时创建keepAliveThread线程");
+
         keepAliveThread.setDaemon(false);
         // keep this thread alive (non daemon thread) until we shutdown
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -209,6 +212,7 @@ final class Bootstrap {
             throw new BootstrapException(e);
         }
 
+        //
         node = new Node(environment) {
             @Override
             protected void validateNodeBeforeAcceptingRequests(
@@ -318,7 +322,8 @@ final class Bootstrap {
             // setDefaultUncaughtExceptionHandler
             Thread.setDefaultUncaughtExceptionHandler(
                 new ElasticsearchUncaughtExceptionHandler(() -> Node.NODE_NAME_SETTING.get(environment.settings())));
-            //
+
+            // 内部会创建Node
             INSTANCE.setup(true, environment);
 
             try {
@@ -327,7 +332,7 @@ final class Bootstrap {
             } catch (IOException e) {
                 throw new BootstrapException(e);
             }
-            //
+            // 启动Node
             INSTANCE.start();
 
             if (closeStandardStreams) {

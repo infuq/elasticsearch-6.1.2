@@ -116,6 +116,7 @@ public final class NetworkModule {
         for (NetworkPlugin plugin : plugins) {
             if (transportClient == false && HTTP_ENABLED.get(settings)) {
                 Map<String, Supplier<HttpServerTransport>> httpTransportFactory = plugin.getHttpTransports(settings, threadPool, bigArrays,
+                    // dispatcher = RestController
                     circuitBreakerService, namedWriteableRegistry, xContentRegistry, networkService, dispatcher);
                 for (Map.Entry<String, Supplier<HttpServerTransport>> entry : httpTransportFactory.entrySet()) {
                     registerHttpTransport(entry.getKey(), entry.getValue());

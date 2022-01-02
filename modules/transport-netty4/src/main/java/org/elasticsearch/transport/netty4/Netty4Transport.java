@@ -202,6 +202,7 @@ public class Netty4Transport extends TcpTransport {
         serverBootstrap.group(new NioEventLoopGroup(workerCount, workerFactory));
         serverBootstrap.channel(NioServerSocketChannel.class);
 
+        //
         serverBootstrap.childHandler(getServerChannelInitializer(name));
 
         serverBootstrap.childOption(ChannelOption.TCP_NODELAY, profileSettings.tcpNoDelay);
@@ -351,6 +352,7 @@ public class Netty4Transport extends TcpTransport {
             ch.pipeline().addLast("logging", new ESLoggingHandler());
             ch.pipeline().addLast("open_channels", Netty4Transport.this.serverOpenChannels);
             ch.pipeline().addLast("size", new Netty4SizeHeaderFrameDecoder());
+            //
             ch.pipeline().addLast("dispatcher", new Netty4MessageChannelHandler(Netty4Transport.this, name));
         }
 
