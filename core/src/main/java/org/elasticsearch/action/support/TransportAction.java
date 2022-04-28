@@ -78,6 +78,7 @@ public abstract class TransportAction<Request extends ActionRequest, Response ex
         if (task == null) {
             execute(null, request, listener);
         } else {
+            //
             execute(task, request, new ActionListener<Response>() {
                 @Override
                 public void onResponse(Response response) {
@@ -136,6 +137,7 @@ public abstract class TransportAction<Request extends ActionRequest, Response ex
         }
 
         RequestFilterChain<Request, Response> requestFilterChain = new RequestFilterChain<>(this, logger);
+        //
         requestFilterChain.proceed(task, actionName, request, listener);
     }
 

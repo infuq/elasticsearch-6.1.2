@@ -551,17 +551,20 @@ public class Netty4HttpServerTransport extends AbstractLifecycleComponent implem
                 final boolean detailedErrorsEnabled,
                 final ThreadContext threadContext) {
             this.transport = transport;
-            //
+            // 处理器
             this.requestHandler = new Netty4HttpRequestHandler(transport, detailedErrorsEnabled, threadContext);
         }
 
         @Override
         protected void initChannel(Channel ch) throws Exception {
             ch.pipeline().addLast("openChannels", transport.serverOpenChannels);
+
+            // 解码器
             final HttpRequestDecoder decoder = new HttpRequestDecoder(
                 Math.toIntExact(transport.maxInitialLineLength.getBytes()),
                 Math.toIntExact(transport.maxHeaderSize.getBytes()),
                 Math.toIntExact(transport.maxChunkSize.getBytes()));
+
             decoder.setCumulator(ByteToMessageDecoder.COMPOSITE_CUMULATOR);
             ch.pipeline().addLast("decoder", decoder);
             ch.pipeline().addLast("decoder_compress", new HttpContentDecompressor());

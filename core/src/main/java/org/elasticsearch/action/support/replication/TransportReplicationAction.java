@@ -352,6 +352,7 @@ public abstract class TransportReplicationAction<
                 } else {
                     setPhase(replicationTask, "primary");
                     final ActionListener<Response> listener = createResponseListener(primaryShardReference);
+                    // LOOK
                     createReplicatedOperation(request,
                             ActionListener.wrap(result -> result.respond(listener), listener::onFailure),
                             primaryShardReference)
@@ -735,6 +736,7 @@ public abstract class TransportReplicationAction<
             }
             final DiscoveryNode node = state.nodes().get(primary.currentNodeId());
             if (primary.currentNodeId().equals(state.nodes().getLocalNodeId())) {
+                //
                 performLocalAction(state, primary, node, indexMetaData);
             } else {
                 performRemoteAction(state, primary, node);

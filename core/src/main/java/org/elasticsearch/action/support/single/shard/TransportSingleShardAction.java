@@ -291,7 +291,10 @@ public abstract class TransportSingleShardAction<Request extends SingleShardRequ
             if (logger.isTraceEnabled()) {
                 logger.trace("executing [{}] on shard [{}]", request, request.internalShardId);
             }
+            //
             Response response = shardOperation(request, request.internalShardId);
+
+            //
             channel.sendResponse(response);
         }
     }

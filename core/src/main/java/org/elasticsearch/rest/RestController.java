@@ -171,6 +171,7 @@ public class RestController extends AbstractComponent implements HttpServerTrans
             return;
         }
         try {
+            //
             tryAllHandlers(request, channel, threadContext);
         } catch (Exception e) {
             try {
@@ -237,6 +238,7 @@ public class RestController extends AbstractComponent implements HttpServerTrans
                 responseChannel = new ResourceHandlingHttpChannel(channel, circuitBreakerService, contentLength);
 
                 final RestHandler wrappedHandler = mHandler.map(h -> handlerWrapper.apply(h)).get();
+                //
                 wrappedHandler.handleRequest(request, responseChannel, client);
                 requestHandled = true;
             } catch (Exception e) {
@@ -333,6 +335,7 @@ public class RestController extends AbstractComponent implements HttpServerTrans
         Iterator<MethodHandlers> allHandlers = getAllHandlers(request);
         for (Iterator<MethodHandlers> it = allHandlers; it.hasNext(); ) {
             final Optional<RestHandler> mHandler = Optional.ofNullable(it.next()).flatMap(mh -> mh.getHandler(request.method()));
+            //
             requestHandled = dispatchRequest(request, channel, client, mHandler);
             if (requestHandled) {
                 break;
